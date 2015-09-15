@@ -3,6 +3,8 @@ Lists = new Meteor.Collection('lists');
 
 if(Meteor.isClient){
     // client code goes here
+ /* Meteor.subscribe('lists');*/
+  /*Meteor.subscribe('todos');*/
   $.validator.setDefaults({
     rules: {
         email: {
@@ -132,13 +134,14 @@ if(Meteor.isClient){
       var todoName = $('[name="todoName"]').val();
       var currentList = this._id;
       var currentUser = Meteor.userId();
-      Todos.insert({
+      /*Todos.insert({
         name: todoName,
         completed: false,
         createdAt: new Date(),
         listId: currentList,
         createdBy: currentUser
-      });
+      });*/
+      Meteor.call('createtodo', currentList, todoName);
       $('[name="todoName"]').val('');
     }
   });
@@ -148,7 +151,8 @@ if(Meteor.isClient){
       var confirm = window.confirm("Delete this task?");
       if (confirm){
         var documentId = this._id;
-        Todos.remove({ _id: documentId });
+       /* Todos.remove({ _id: documentId });*/
+       Meteor.call('todoremove', documentId);
       }
     },
     "keyup .save-todo": function (event){
@@ -158,14 +162,16 @@ if(Meteor.isClient){
       }
       else{
         var todoItem = $(event.target).val();  
-        Todos.update({ _id: documentId }, {$set: { name: todoItem }});
+        /*Todos.update({ _id: documentId }, {$set: { name: todoItem }});*/
+        Meteor.call('todoupdatename', documentId, todoItem);
         console.log("Task changed to: " + todoItem);
       }
     },
     "change .completed": function (event){
       var documentId = this._id;
       var isCompleted = this.completed;
-      Todos.update({ _id: documentId}, {$set: {completed: !isCompleted}});
+     /* Todos.update({ _id: documentId}, {$set: {completed: !isCompleted}});*/
+     Meteor.call('todoupdate', documentId, isCompleted);
     }
   });
   Template.todoItem.helpers({
@@ -191,10 +197,17 @@ if(Meteor.isClient){
       event.preventDefault();
       var listName = $('[name=listName]').val();
       var currentUser = Meteor.userId();
-      Lists.insert({
+      /*Lists.insert({
           name: listName,
           createdBy: currentUser
       }, function (error, result){
+        if (error){
+          console.log("helloo");
+        } else { 
+        Router.go('listPage', {_id :result});
+        }
+      });*/
+      Meteor.call('createlist', listName, function (error, result){
         if (error){
           console.log("helloo");
         } else { 
@@ -214,18 +227,55 @@ if(Meteor.isClient){
 }
 
 if(Meteor.isServer){
-    // server code goes here
+  // server code goes here
+  Meteor.publish('lists', function(){
+    //here we are doing this.userId for retrieving id of the curently logged in user not Meteor.userid
+    var currentUser = this.userId;
+    return Lists.find({ createdBy: currentUser });
+  });
+  Meteor.publish('todos', function(currentList){
+    var currentUser = this.userId;
+    return Todos.find({createdBy:currentUser, listId:currentList});
+  });
+  Meteor.methods({
+    createlist: function(listName) {
+      //retrieve list for user
+      var currentUser = Meteor.userId();
+      return Lists.insert({ name: listName, createdBy: currentUser})
+    },
+    createtodo: function(currentList, todoName){
+      var currentUser = Meteor.userId();
+      Todos.insert({
+        name: todoName,
+        completed: false,
+        createdAt: new Date(),
+        listId: currentList,
+        createdBy: currentUser
+      });
+    },
+    todoupdate: function(documentId, isCompleted){
+      Todos.update({ _id: documentId}, {$set: {completed: !isCompleted}});
+    },
+    todoupdatename: function(documentId, todoItem){
+      Todos.update({ _id: documentId }, {$set: { name: todoItem }});
+    },
+    todoremove: function(documentId){
+      Todos.remove({ _id: documentId });
+    }
+
+  });
 }
 
 Router.configure({
-    layoutTemplate: 'main'
+    layoutTemplate: 'main',
+    loadingTemplate: 'loading'
 });
 
 Router.route('register');
 Router.route('login');
 Router.route('/', {
   name: 'home',
-  template: 'home'
+  template: 'home',
 });
 
 Router.route('/lists', {
@@ -251,7 +301,10 @@ Router.route('/lists', {
   },
   onStop: function(){
         console.log("You triggered 'onStop' for 'listPage' route.");
-  }
+  },
+  subscriptions: function(){
+        return Meteor.subscribe('lists');
+    }
 });
 
 Router.route('/list/:_id', {
@@ -269,5 +322,9 @@ Router.route('/list/:_id', {
       } else {
         this.render("login");
       }
+    },
+    waitOn: function(){
+        var currentList = this.params._id;
+        return [ Meteor.subscribe('lists'), Meteor.subscribe('todos', currentList) ]
     }
 });
