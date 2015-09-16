@@ -9,3 +9,7 @@ Meteor.publish('todos', function(currentList){
     var currentUser = this.userId;
     return Todos.find({createdBy:currentUser, listId:currentList});
 });
+
+Meteor.publish('books', function(){
+    return Books.find({});
+})

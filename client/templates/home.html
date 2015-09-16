@@ -1,6 +1,9 @@
 <template name="home">
-<p>welocome to the home</p>
+{{#if currentUser}}
 {{>insertBookForm}}
+{{else}}
+<p>Welcome to the Home You need to Login First</p>
+{{/if}}
 </template>
 
 <template name="insertBookForm">
