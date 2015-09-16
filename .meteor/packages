@@ -9,3 +9,4 @@ iron:router
 accounts-password
 accounts-ui
 themeteorchef:jquery-validation
+mrt:bootstrap-3
