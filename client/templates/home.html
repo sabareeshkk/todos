@@ -1,3 +1,8 @@
 <template name="home">
 <p>welocome to the home</p>
+{{>insertBookForm}}
+</template>
+
+<template name="insertBookForm">
+  {{> quickForm collection="Books" id="insertBookForm" type="insert"}}
 </template>

@@ -28,3 +28,6 @@
 .checked [name=todoItem]:focus{
     background-color:#f0f0f0;
 }
+.row {
+    margin-top: 51px;
+}

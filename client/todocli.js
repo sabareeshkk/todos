@@ -20,7 +20,8 @@ $.validator.setDefaults({
         }
     }
   });
-  Template.login.onRendered(function(){
+
+Template.login.onRendered(function(){
     var validator = $('.login-form').validate({
       submitHandler: function(event){
         var email = $('[name=email]').val();
@@ -45,7 +46,7 @@ $.validator.setDefaults({
       }
     });
   });
-  Template.register.onRendered(function(){
+Template.register.onRendered(function(){
     $('.register-form').validate({
       submitHandler: function (event){
         var email = $('[name=email]').val();

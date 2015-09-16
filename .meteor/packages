@@ -10,3 +10,7 @@ accounts-password
 accounts-ui
 themeteorchef:jquery-validation
 mrt:bootstrap-3
+fortawesome:fontawesome
+aldeed:autoform
+aldeed:collection2
+aldeed:autoform-bs-datepicker
